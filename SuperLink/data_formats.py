@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class Data:
     sender: "Client | None"
     type: str
-    content: dict | list
+    content: dict
 
     def marshal(self):
         return json.dumps({
@@ -18,7 +18,7 @@ class Data:
             "content": self.content
         })
 
-def format_data(sender: "Client | None", type: str, content: dict | list):
+def format_data(sender: "Client | None", type: str, content: dict):
     return Data(sender, type, content)
 
 def unmarshal_data(data_json):

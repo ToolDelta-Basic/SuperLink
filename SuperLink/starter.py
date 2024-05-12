@@ -40,10 +40,10 @@ def register_client(cli: Client):
         raise ConnectionError("频道大区密码错误")
 
 async def kick_client_before_register(ws: WSCli, reason: str):
-    await ws.send(format_data(None, "server.auth_failed", [reason]).marshal())
+    await ws.send(format_data(None, "server.auth_failed", {"Reason": reason}).marshal())
 
 async def kick_client(cli: Client, reason: str):
-    await cli.send(format_data(None, "server.kick", [reason]))
+    await cli.send(format_data(None, "server.kick", {"Reason": reason}))
 
 def remove_client(cli: Client):
     chan = cli.channel
