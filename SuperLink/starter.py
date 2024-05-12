@@ -73,6 +73,8 @@ async def client_hander(ws: WSCli):
             remove_client(cli)
 
 def main():
+    Print.print_with_info("§d服服互通: 服务端 by SuperScript", "§d 加载 ")
+    Print.print_with_info("§d项目地址: https://github.com/ToolDelta/SuperLink", "§d 加载 ")
     extensions.make_extension_folder()
     extensions.load_extensions()
     cfgs = read_server_config()
