@@ -2,11 +2,19 @@ import os
 import sys
 import importlib
 import traceback
-import asyncio
 from typing import Callable, Coroutine
 from .color_print import Print
 from .client_classes import Client
 from .data_formats import Data
+from .utils import gather_funcs
+
+__all__ = [
+    "extensions",
+    "on_load",
+    "on_client_join",
+    "on_client_leave",
+    "on_data"
+]
 
 class Extensions:
 
@@ -33,34 +41,34 @@ class Extensions:
             raise SystemExit
 
     async def handle_load(self):
-        await run_multi_async(self.on_load_cbs)
+        await gather_funcs(func() for func in self.on_load_cbs)
 
     async def handle_client_join(self, cli: Client):
-        await run_multi_async(self.on_client_join_cbs, (cli,))
+        await gather_funcs(func(cli) for func in self.on_client_join_cbs)
 
     async def handle_client_leave(self, cli: Client):
-        await run_multi_async(self.on_client_leave_cbs, (cli,))
+        await gather_funcs(func(cli) for func in self.on_client_leave_cbs)
 
     async def handle_data(self, data: Data):
-        await run_multi_async(self.on_client_join_cbs, (data,))
+        await gather_funcs(func(data) for func in self.registed_data_handler.get(data.type, ()))
 
 # Public
 
-def on_load(f: Callable[[], None]):
+def on_load(f: Callable[[], Coroutine]):
     """
     系统启动的时候被加载
     """
     extensions.on_load_cbs.append(f)
     return f
 
-def on_client_join(f: Callable[[Client], None]):
+def on_client_join(f: Callable[[Client], Coroutine]):
     """
     监听客户端连接
     """
     extensions.on_client_join_cbs.append(f)
     return f
 
-def on_client_leave(f: Callable[[Client], None]):
+def on_client_leave(f: Callable[[Client], Coroutine]):
     """
     监听客户端断开连接
     """
@@ -71,15 +79,9 @@ def on_data(data_type: str):
     """
     监听特定的数据类型消息
     """
-    def receiver(f: Callable[[Data], None]):
+    def receiver(f: Callable[[Data], Coroutine]):
         extensions.registed_data_handler.get(data_type, [].copy()).append(f)
         return f
     return receiver
 
 extensions = Extensions()
-
-# private
-
-async def run_multi_async(funcs: list[Callable[..., Coroutine]], args = ()):
-    evt_loop = asyncio.get_event_loop()
-    return await asyncio.gather(*(evt_loop.create_task(func(*args)) for func in funcs))

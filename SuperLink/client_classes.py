@@ -1,6 +1,8 @@
+import asyncio
 from typing import Optional, Any
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
 from .data_formats import Data
+from .utils import gather_funcs
 
 class Client:
     def __init__(self, ws: "WSCli", name: str, ipaddr, channel: "Channel", token: str | None):
@@ -27,3 +29,10 @@ class Channel:
 
     def is_member(self, cli: Client):
         return cli.ipaddr in self.members.keys()
+
+    async def broadcast(self, data: Data):
+        clis: list[Client] = []
+        for cli in self.members.values():
+            if data.sender is None or cli.ipaddr != data.sender.ipaddr:
+                clis.append(cli)
+        await gather_funcs(cli.send(data) for cli in clis)

@@ -69,12 +69,15 @@ async def client_hander(ws: WSCli):
         remove_client(cli)
 
 def main():
+    extensions.make_extension_folder()
+    extensions.load_extensions()
     cfgs = read_server_config()
     Print.print_suc(f"服务端将在端口: §f{cfgs['开放端口']} §a开启")
     asyncio.run(extensions.handle_load())
 
-    asyncio.get_event_loop()
+    global_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(global_loop)
 
     main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口'])
-    asyncio.get_event_loop().run_until_complete(main_server)
-    asyncio.get_event_loop().run_forever()
+    global_loop.run_until_complete(main_server)
+    global_loop.run_forever()
