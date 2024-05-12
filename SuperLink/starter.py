@@ -39,11 +39,11 @@ def register_client(cli: Client):
     if channel.token is not None and channel.token != cli.token:
         raise ConnectionError("频道大区密码错误")
 
-def kick_client_before_register(ws: WSCli, reason: str):
-    asyncio.run(ws.send(format_data(None, "server.auth_failed", [reason]).marshal()))
+async def kick_client_before_register(ws: WSCli, reason: str):
+    await ws.send(format_data(None, "server.auth_failed", [reason]).marshal())
 
-def kick_client(cli: Client, reason: str):
-    asyncio.run(cli.send(format_data(None, "server.kick", [reason])))
+async def kick_client(cli: Client, reason: str):
+    await cli.send(format_data(None, "server.kick", [reason]))
 
 def remove_client(cli: Client):
     chan = cli.channel
@@ -54,9 +54,10 @@ async def client_hander(ws: WSCli):
     try:
         cli = init_client_data(ws)
     except Exception as err:
-        kick_client_before_register(ws, err.args[0])
+        await kick_client_before_register(ws, err.args[0])
         return
     try:
+        await extensions.handle_client_join(cli)
         while 1:
             data = unmarshal_data(await ws.recv())
             await extensions.handle_data(data)
@@ -64,9 +65,12 @@ async def client_hander(ws: WSCli):
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 连接出现问题: {err}")
     except Exception as err:
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 的数据处理出现问题: {err}")
-        kick_client(cli, "服务端数据处理出现问题")
+        await kick_client(cli, "服务端数据处理出现问题")
     finally:
-        remove_client(cli)
+        try:
+            await extensions.handle_client_leave(cli)
+        finally:
+            remove_client(cli)
 
 def main():
     extensions.make_extension_folder()
