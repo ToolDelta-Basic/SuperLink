@@ -1,11 +1,11 @@
 import websockets
 import asyncio
-import json
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
 from .color_print import Print
 from .cfg import read_server_config
 from .client_classes import Channel, Client
 from .data_formats import format_data, unmarshal_data
+from .extensions import extensions
 
 channels: dict[str, Channel] = {}
 
@@ -70,6 +70,7 @@ async def client_hander(ws: WSCli):
 def main():
     cfgs = read_server_config()
     Print.print_suc(f"服务端将在端口: §f{cfgs['开放端口']} §a开启")
+    extensions.handle_load()
 
     main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口'])
     asyncio.get_event_loop().run_until_complete(main_server)
