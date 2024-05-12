@@ -39,8 +39,8 @@ def register_client(cli: Client):
     if channel.token is not None and channel.token != cli.token:
         raise ConnectionError("频道大区密码错误")
 
-def kick_client_before_register(cli: Client, reason: str):
-    asyncio.run(cli.send(format_data(None, "server.auth_failed", [reason])))
+def kick_client_before_register(ws: WSCli, reason: str):
+    asyncio.run(ws.send(format_data(None, "server.auth_failed", [reason]).marshal()))
 
 def kick_client(cli: Client, reason: str):
     asyncio.run(cli.send(format_data(None, "server.kick", [reason])))
@@ -54,7 +54,7 @@ async def client_hander(ws: WSCli):
     try:
         cli = init_client_data(ws)
     except Exception as err:
-        kick_client_before_register(cli, err.args[0]) # type: ignore
+        kick_client_before_register(ws, err.args[0])
         return
     try:
         while 1:
