@@ -59,6 +59,7 @@ async def client_hander(ws: WSCli):
     try:
         while 1:
             data = unmarshal_data(await ws.recv())
+            await extensions.handle_data(data)
     except websockets.exceptions.WebSocketException as err:
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 连接出现问题: {err}")
     except Exception as err:
@@ -70,7 +71,9 @@ async def client_hander(ws: WSCli):
 def main():
     cfgs = read_server_config()
     Print.print_suc(f"服务端将在端口: §f{cfgs['开放端口']} §a开启")
-    extensions.handle_load()
+    asyncio.run(extensions.handle_load())
+
+    asyncio.get_event_loop()
 
     main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口'])
     asyncio.get_event_loop().run_until_complete(main_server)
