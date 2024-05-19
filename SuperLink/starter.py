@@ -104,4 +104,5 @@ def main():
     try:
         global_loop.run_forever()
     except KeyboardInterrupt:
+        Print.print_suc("已关闭服务端.")
         exit()

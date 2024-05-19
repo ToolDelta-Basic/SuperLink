@@ -153,6 +153,9 @@ class SuperLink(Plugin):
                 "此租赁服的公开显示名": str,
                 "登入后自动连接到的频道大区名": str,
                 "频道密码": str
+            },
+            "基本互通配置": {
+                "是否转发玩家发言": bool
             }
         }
         self.cfg, _ = Config.getPluginConfigAndVersion(
@@ -174,3 +177,7 @@ class SuperLink(Plugin):
 
     def active(self):
         self.active_protocol.start()
+
+    @plugins.add_broadcast_listener("superlink.event")
+    def listen_chat(self, data: Data):
+        return True
