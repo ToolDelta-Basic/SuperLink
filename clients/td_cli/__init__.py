@@ -4,7 +4,7 @@ import time
 import asyncio
 from dataclasses import dataclass
 from typing import Any
-from tooldelta import Frame, plugins, Plugin, Config, Print
+from tooldelta import Frame, plugins, Plugin, Config, Print, Utils
 
 # CUSTOMIZE CLASS
 
@@ -31,7 +31,7 @@ class BasicProtocol:
         self.ws_ip = ws_ip
         self.cfgs = cfgs
         self.active = False
-        self.wait_reqs = {}
+        self.req_resps: dict[str, Data | None] = {}
 
     def start(self):
         # 开始连接
@@ -46,8 +46,22 @@ class BasicProtocol:
         raise NotImplementedError
 
 class SuperLinkProtocol(BasicProtocol):
+    def __init__(self, frame: Frame, ws_ip: str, cfgs: dict):
+        super().__init__(frame, ws_ip, cfgs)
+        self.retryTime = 30
+        self.retryCount = 0
+
+    @Utils.thread_func("服服互通自动重连线程")
     def start(self):
-        asyncio.run(self.start_ws_con())
+        while 1:
+            asyncio.run(self.start_ws_con())
+            self.retryCount += 1
+            if self.retryCount < 10:
+                self.retryTime = self.retryCount * 10
+            else:
+                self.retryTime = 600
+            Print.print_war(f"服服互通断开连接, 将在 {self.retryTime} 后重连")
+            time.sleep(self.retryTime)
 
     async def start_ws_con(self):
         try:
@@ -68,6 +82,7 @@ class SuperLinkProtocol(BasicProtocol):
                     Print.print_err(f"服服互通: 中心服务器登录失败: {login_resp.content['Reason']}")
                 elif login_resp.type == "server.auth_success":
                     Print.print_suc("服服互通: 中心服务器登录成功")
+                    self.retryCount = 0
                     while 1:
                         await self.handle(json.loads(await ws.recv()))
 
@@ -80,7 +95,10 @@ class SuperLinkProtocol(BasicProtocol):
 
     async def handle(self, recv_data: dict):
         data = format_data(recv_data["Type"], recv_data)
-        plugins.broadcastEvt("superlink.event", data)
+        if data.content.get("UUID") in self.req_resps.keys():
+            self.req_resps[data.content["UUID"]] = data
+        else:
+            plugins.broadcastEvt("superlink.event", data)
 
     async def send(self, data: Data):
         await self.ws.send(data.marshal())
@@ -93,25 +111,22 @@ class SuperLinkProtocol(BasicProtocol):
         await self.send(data)
         req_id = data.content["UUID"]
         ptime = time.time()
-        while req_id not in self.wait_reqs.keys():
+        self.req_resps[req_id] = None
+        while req_id not in self.req_resps.keys():
             if timeout != -1 and time.time() - ptime > timeout:
-                del self.wait_reqs[req_id]
+                del self.req_resps[req_id]
                 return None
-        res = self.wait_reqs[req_id]
-        del self.wait_reqs[req_id]
+        res = self.req_resps[req_id]
+        del self.req_resps[req_id]
         return res
 
-
 # PLUGIN MAIN
-
 
 @plugins.add_plugin_as_api("服服互通")
 class SuperLink(Plugin):
     name = "服服互通"
     author = "SuperScript"
     version = (0, 0, 4)
-
-    CON_IP = "127.0.0.1:24013"
 
     def __init__(self, frame: Frame):
         super().__init__(frame)

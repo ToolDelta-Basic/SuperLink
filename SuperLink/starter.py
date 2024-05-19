@@ -1,5 +1,6 @@
 import websockets
 import asyncio
+import json
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
 from .color_print import Print
 from .cfg import read_server_config
@@ -21,8 +22,13 @@ def delete_channel(chan: Channel):
 
 def init_client_data(ws: WSCli):
     header = ws.request_headers
-    # print(header)
-    # print(repr(header.get("Sec-WebSocket-Protocol")))
+    html_ws_reqs = header.get("Sec-WebSocket-Protocol")
+    print(repr(html_ws_reqs))
+    if html_ws_reqs:
+        try:
+            header = json.loads(html_ws_reqs)
+        except json.JSONDecodeError:
+            raise ValueError("Header: Sec-WS-Proto is not a valid json object")
     name = header.get("ServerName")
     channel_name = header.get("ChannelName")
     token = header.get("ChannelToken")
