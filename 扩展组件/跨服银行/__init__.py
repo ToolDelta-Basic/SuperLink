@@ -4,7 +4,8 @@ from SuperLink import *
 __extension_data__ = {
     "name": "跨服银行",
     "id": "bank-link",
-    "version": (0, 0, 1)
+    "version": (0, 0, 1),
+    "author": "SuperScript"
 }
 
 def get_jsdata(c: str, p: str):

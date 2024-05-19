@@ -21,6 +21,8 @@ def delete_channel(chan: Channel):
 
 def init_client_data(ws: WSCli):
     header = ws.request_headers
+    # print(header)
+    # print(repr(header.get("Sec-WebSocket-Protocol")))
     name = header.get("ServerName")
     channel_name = header.get("ChannelName")
     token = header.get("ChannelToken")

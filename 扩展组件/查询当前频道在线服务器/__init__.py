@@ -3,7 +3,8 @@ from SuperLink import *
 __extension_data__ = {
     "name": "查询频道在线服务器",
     "id": "check-channel-servers",
-    "version": (0, 0, 1)
+    "version": (0, 0, 1),
+    "author": "SuperScript"
 }
 
 @on_data("request.channel_members")

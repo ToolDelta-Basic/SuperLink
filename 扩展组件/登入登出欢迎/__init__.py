@@ -3,7 +3,8 @@ from SuperLink import *
 __extension_data__ = {
     "name": "登入登出欢迎",
     "id": "log-welcome",
-    "version": (0, 0, 1)
+    "version": (0, 0, 1),
+    "author": "SuperScript"
 }
 
 @on_client_join

@@ -3,7 +3,8 @@ from SuperLink import *
 __extension_data__ = {
     "name": "消息互通",
     "id": "basic-msg-link",
-    "version": (0, 0, 1)
+    "version": (0, 0, 1),
+    "author": "SuperScript"
 }
 
 @on_data("chat.msg")

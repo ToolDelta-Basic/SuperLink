@@ -1,0 +1,19 @@
+<script>
+    console_txts = ""
+    function connect() {
+        default_url = "ws://superlink.tblstudio.cn:24013"
+        my_url = "ws://127.0.0.1:24013"
+        ws = new WebSocket(
+            my_url,
+            ["header1", "header2", "header3"]
+        )
+    }
+    function test() {
+        console_txts += "?"
+        output.value = console_txts
+    }
+</script>
+<input type="text" name="user_name"></input>
+<button onclick="connect()">登录</button>
+<br />
+<textarea id="output" cols="50" rows="10"></textarea>
