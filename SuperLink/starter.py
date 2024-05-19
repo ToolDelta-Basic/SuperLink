@@ -101,4 +101,7 @@ def main():
 
     main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口'])
     global_loop.run_until_complete(main_server)
-    global_loop.run_forever()
+    try:
+        global_loop.run_forever()
+    except KeyboardInterrupt:
+        exit()
