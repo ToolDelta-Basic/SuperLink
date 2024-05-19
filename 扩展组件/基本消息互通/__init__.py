@@ -11,4 +11,5 @@ __extension_data__ = {
 async def on_recv_data(data: Data):
     sender: Client = data.sender # type: ignore
     chan = sender.channel
+    Print.print_inf(f"玩家发言>> {chan.name} {sender.name} §7{data.content['Name']}: {data.content['Msg']}")
     await chan.broadcast(data)

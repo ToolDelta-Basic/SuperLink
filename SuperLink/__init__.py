@@ -3,6 +3,7 @@ from .data_formats import *
 from .extensions import *
 from .data_formats import *
 from .cfg import Cfg
+from .color_print import Print
 
 __all__ = [
     "Cfg",
@@ -10,6 +11,7 @@ __all__ = [
     "Data",
     "Client",
     "Channel",
+    "Print",
     "format_data",
     "on_load",
     "on_client_join",
