@@ -209,7 +209,7 @@ class Print:
                         + " "
                         + Print.colormode_replace(setNextColor + text_line)
                     )
-                print("\n".join(output_txts), **print_kwargs)
+                print("\n".join(output_txts).encode(errors="ignore").decode(), **print_kwargs)
         else:
                 print(
                     datetime.datetime.now().strftime("[%H:%M] ")

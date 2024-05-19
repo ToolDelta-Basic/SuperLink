@@ -55,6 +55,7 @@ class Extensions:
         await gather_funcs(func(cli) for func in self.on_client_leave_cbs)
 
     async def handle_data(self, data: Data):
+        print(data.type, self.registed_data_handler)
         await gather_funcs(func(data) for func in self.registed_data_handler.get(data.type, ()))
 
 extensions = Extensions()
@@ -87,7 +88,10 @@ def on_data(data_type: str):
     监听特定的数据类型消息
     """
     def receiver(f: Callable[[Data], Coroutine]):
-        extensions.registed_data_handler.get(data_type, [].copy()).append(f)
+        if data_type in extensions.registed_data_handler.keys():
+            extensions.registed_data_handler[data_type].append(f)
+        else:
+            extensions.registed_data_handler[data_type] = [f]
         return f
     return receiver
 

@@ -1,6 +1,7 @@
 import websockets
 import asyncio
 import json
+import base64
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
 from .color_print import Print
 from .cfg import read_server_config
@@ -23,7 +24,6 @@ def delete_channel(chan: Channel):
 def init_client_data(ws: WSCli):
     header = ws.request_headers
     html_ws_reqs = header.get("Sec-WebSocket-Protocol")
-    print(repr(html_ws_reqs))
     if html_ws_reqs:
         try:
             header = json.loads(html_ws_reqs)
@@ -40,12 +40,17 @@ def init_client_data(ws: WSCli):
         raise ValueError("Header: need server name")
     if channel_name is None:
         raise ValueError("Header: need channel name")
+    name = base64.b64decode(name).decode("utf-8")
+    channel_name = base64.b64decode(channel_name).decode("utf-8")
+    if token:
+        token = base64.b64decode(token).decode("utf-8")
     if channel_name not in channels.keys():
         create_channel(channel_name, token)
     else:
         if channels[channel_name].token and channels[channel_name].token != token:
             raise ValueError("频道密码错误")
-    channel = get_channel(name)
+    channel = get_channel(channel_name)
+    Print.print_inf(f"客户端 {ipaddr[0]}:{ipaddr[1]} 已作为 {channel.name}>{name} 登录")
     return Client(ws, name, ipaddr, channel, token)
 
 def register_client(cli: Client):
@@ -68,14 +73,19 @@ async def client_hander(ws: WSCli):
     try:
         cli = init_client_data(ws)
     except Exception as err:
+        import traceback
+        traceback.print_exc()
+        Print.print_err(f"客户端 {ws.remote_address[0]}:{ws.remote_address[1]}§c 登录出现问题: {err}")
         await kick_client_before_register(ws, err.args[0])
         return
     try:
         await ws.send(format_data(None, "server.auth_success", {"Member_count" : len(cli.channel.members)}).marshal())
         await extensions.handle_client_join(cli)
         while 1:
-            data = unmarshal_data(await ws.recv())
+            data = unmarshal_data(await ws.recv(), cli)
             await extensions.handle_data(data)
+    except websockets.exceptions.ConnectionClosedError:
+        Print.print_inf(f"客户端 {cli.channel.name}:{cli.name}§c 断开连接")
     except websockets.exceptions.WebSocketException as err:
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 连接出现问题: {err}")
     except Exception as err:

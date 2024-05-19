@@ -13,14 +13,14 @@ class Data:
 
     def marshal(self):
         return json.dumps({
-            "sender": self.sender,
-            "type": self.type,
-            "content": self.content
+            "Sender": self.sender,
+            "Type": self.type,
+            "Content": self.content
         })
 
 def format_data(sender: "Client | None", type: str, content: dict):
     return Data(sender, type, content)
 
-def unmarshal_data(data_json):
+def unmarshal_data(data_json, sender: "Client | None"):
     dat = json.loads(data_json)
-    return Data(dat["Sender"], dat["Type"], dat["Content"])
+    return Data(sender, dat["Type"], dat["Content"])
