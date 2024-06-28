@@ -2,6 +2,7 @@ import websockets
 import asyncio
 import json
 import base64
+from websockets.exceptions import ConnectionClosedError, WebSocketException
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
 from .color_print import Print
 from .cfg import read_server_config
@@ -84,9 +85,9 @@ async def client_hander(ws: WSCli):
         while 1:
             data = unmarshal_data(await ws.recv(), cli)
             await extensions.handle_data(data)
-    except websockets.exceptions.ConnectionClosedError:
+    except ConnectionClosedError:
         Print.print_inf(f"客户端 {cli.channel.name}:{cli.name}§c 断开连接")
-    except websockets.exceptions.WebSocketException as err:
+    except WebSocketException as err:
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 连接出现问题: {err}")
     except Exception as err:
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 的数据处理出现问题: {err}")
@@ -109,7 +110,7 @@ def main():
     global_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(global_loop)
 
-    main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口'])
+    main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口']) # type: ignore
     global_loop.run_until_complete(main_server)
     try:
         global_loop.run_forever()
