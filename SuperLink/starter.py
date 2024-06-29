@@ -105,7 +105,6 @@ def main():
     extensions.load_extensions()
     cfgs = read_server_config()
     Print.print_suc(f"服务端将在端口: §f{cfgs['开放端口']} §a开启")
-    asyncio.run(extensions.handle_load())
 
     global_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(global_loop)
@@ -113,6 +112,7 @@ def main():
 
     main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口']) # type: ignore
     global_loop.run_until_complete(main_server)
+    asyncio.run(extensions.handle_load())
     try:
         global_loop.run_forever()
     except KeyboardInterrupt:
