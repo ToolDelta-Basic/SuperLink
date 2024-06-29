@@ -109,6 +109,7 @@ def main():
 
     global_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(global_loop)
+    extensions.set_event_loop(global_loop)
 
     main_server = websockets.serve(client_hander, "localhost", cfgs['开放端口']) # type: ignore
     global_loop.run_until_complete(main_server)

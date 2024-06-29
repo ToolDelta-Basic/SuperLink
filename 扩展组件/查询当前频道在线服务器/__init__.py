@@ -7,10 +7,6 @@ __extension_data__ = {
     "author": "SuperScript"
 }
 
-@on_load
-async def load():
-    print(1)
-
 @on_data("request.channel_members")
 async def handler(data: Data):
     sender: Client = data.sender # type: ignore

@@ -3,6 +3,7 @@ import sys
 import importlib
 import traceback
 from typing import Callable, Coroutine
+from asyncio import AbstractEventLoop
 from .color_print import Print
 from .client_classes import Client
 from .data_formats import Data, format_data
@@ -27,6 +28,9 @@ class Extensions:
         self.on_client_join_cbs = []
         self.on_client_leave_cbs = []
         self.registed_data_handler = {}
+
+    def set_event_loop(self, evt_loop: AbstractEventLoop):
+        self.event_loop = evt_loop
 
     def make_extension_folder(self):
         os.makedirs(self.EXTENSION_DIR, exist_ok=True)
