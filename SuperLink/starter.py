@@ -73,9 +73,8 @@ def remove_client(cli: Client):
 async def client_hander(ws: WSCli):
     try:
         cli = init_client_data(ws)
+        cli.channel.join(cli)
     except Exception as err:
-        import traceback
-        traceback.print_exc()
         Print.print_err(f"客户端 {ws.remote_address[0]}:{ws.remote_address[1]}§c 登录出现问题: {err}")
         await kick_client_before_register(ws, err.args[0])
         return

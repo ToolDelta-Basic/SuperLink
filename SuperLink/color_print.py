@@ -192,32 +192,32 @@ class Print:
             Print.c_log(info, text)
         setNextColor = "§r"
         if "\n" in text:
-                output_txts = []
-                for text_line in str(text).split("\n"):
-                    if "§" in text_line:
-                        try:
-                            n = text_line.rfind("§")
-                            _setNextCol = text_line[n: n + 2]
-                            if setNextColor == -1:
-                                raise AssertionError
-                            setNextColor = _setNextCol
-                        except Exception:
-                            pass
-                    output_txts.append(
-                        datetime.datetime.now().strftime("[%H:%M] ")
-                        + Print.colormode_replace(info, 7)
-                        + " "
-                        + Print.colormode_replace(setNextColor + text_line)
-                    )
-                print("\n".join(output_txts).encode(errors="ignore").decode(), **print_kwargs)
-        else:
-                print(
+            output_txts = []
+            for text_line in str(text).split("\n"):
+                if "§" in text_line:
+                    try:
+                        n = text_line.rfind("§")
+                        _setNextCol = text_line[n: n + 2]
+                        if setNextColor == -1:
+                            raise AssertionError
+                        setNextColor = _setNextCol
+                    except Exception:
+                        pass
+                output_txts.append(
                     datetime.datetime.now().strftime("[%H:%M] ")
                     + Print.colormode_replace(info, 7)
                     + " "
-                    + Print.colormode_replace(text),
-                    **print_kwargs,
+                    + Print.colormode_replace(setNextColor + text_line)
                 )
+            print("\n".join(output_txts).encode(errors="ignore").decode(), **print_kwargs)
+        else:
+            print(
+                datetime.datetime.now().strftime("[%H:%M] ")
+                + Print.colormode_replace(info, 7)
+                + " "
+                + Print.colormode_replace(text),
+                **print_kwargs,
+            )
 
     def clean_print(self, text: str, **print_kwargs) -> None:
         """依照mc的颜色代码输出文本，可带有print函数的参数

@@ -13,7 +13,7 @@ class Data:
 
     def marshal(self):
         return json.dumps({
-            "Sender": self.sender,
+            "Sender": self.sender.name if self.sender else "System",
             "Type": self.type,
             "Content": self.content
         })

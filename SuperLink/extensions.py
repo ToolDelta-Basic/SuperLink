@@ -59,7 +59,6 @@ class Extensions:
         await gather_funcs(func(cli) for func in self.on_client_leave_cbs)
 
     async def handle_data(self, data: Data):
-        print(data.type, self.registed_data_handler)
         await gather_funcs(func(data) for func in self.registed_data_handler.get(data.type, ()))
 
 extensions = Extensions()
