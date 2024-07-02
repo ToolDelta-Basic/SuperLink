@@ -1,6 +1,6 @@
 from typing import Optional, Any
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
-from .data_formats import Data
+from .data_formats import Data, format_data
 from .utils import gather_funcs
 
 class Client:
@@ -20,10 +20,12 @@ class Channel:
         self.token = token
         self.members: dict[Any, Client] = {}
 
-    def join(self, cli: Client):
+    async def join(self, cli: Client):
         self.members[cli.ipaddr] = cli
+        await self.broadcast(format_data(cli, "client.join", {"Name": cli.name}))
 
-    def leave(self, cli: Client):
+    async def leave(self, cli: Client):
+        await self.broadcast(format_data(cli, "client.leave", {"Name": cli.name}))
         del self.members[cli.ipaddr]
 
     def is_member(self, cli: Client):

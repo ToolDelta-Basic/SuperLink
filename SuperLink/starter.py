@@ -36,7 +36,7 @@ def init_client_data(ws: WSCli):
     protocol_name = header.get("Protocol")
     ipaddr = ws.remote_address
     if protocol_name != "SuperLink-v4@SuperScript":
-        raise ValueError("协议名错误, 目前仅支持 SuperLink-v4@SuperScript 协议")
+        raise ValueError(f"协议名错误, 目前仅支持 SuperLink-v4@SuperScript 协议, 目前使用 {protocol_name}")
     if name is None:
         raise ValueError("Header: need server name")
     if channel_name is None:
@@ -65,15 +65,15 @@ async def kick_client_before_register(ws: WSCli, reason: str):
 async def kick_client(cli: Client, reason: str):
     await cli.send(format_data(None, "server.kick", {"Reason": reason}))
 
-def remove_client(cli: Client):
+async def remove_client(cli: Client):
     chan = cli.channel
     if chan.is_member(cli):
-        chan.leave(cli)
+        await chan.leave(cli)
 
 async def client_hander(ws: WSCli):
     try:
         cli = init_client_data(ws)
-        cli.channel.join(cli)
+        await cli.channel.join(cli)
     except Exception as err:
         Print.print_err(f"客户端 {ws.remote_address[0]}:{ws.remote_address[1]}§c 登录出现问题: {err}")
         await kick_client_before_register(ws, err.args[0])
@@ -89,13 +89,15 @@ async def client_hander(ws: WSCli):
     except WebSocketException as err:
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 连接出现问题: {err}")
     except Exception as err:
+        import traceback
+        traceback.print_exc()
         Print.print_err(f"客户端 {cli.channel.name}:{cli.name}§c 的数据处理出现问题: {err}")
         await kick_client(cli, "服务端数据处理出现问题")
     finally:
         try:
             await extensions.handle_client_leave(cli)
         finally:
-            remove_client(cli)
+            await remove_client(cli)
 
 def main():
     Print.print_with_info("§d服服互通: 服务端 by SuperScript", "§d 加载 ")
