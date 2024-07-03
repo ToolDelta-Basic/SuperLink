@@ -111,7 +111,7 @@ def main():
     asyncio.set_event_loop(global_loop)
     extensions.set_event_loop(global_loop)
 
-    main_server = websockets.serve(client_hander, "127.0.0.1", cfgs['开放端口']) # type: ignore
+    main_server = websockets.serve(client_hander, "0.0.0.0", cfgs['开放端口']) # type: ignore
     global_loop.run_until_complete(main_server)
     asyncio.run(extensions.handle_load())
     try:
