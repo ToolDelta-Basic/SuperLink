@@ -3,6 +3,7 @@ import base64
 import json
 import pathlib
 import ssl
+import pathvalidate
 
 import websockets
 from websockets.exceptions import ConnectionClosedError, WebSocketException
@@ -61,6 +62,10 @@ def init_client_data(ws: WSCli):
     if token:
         token = base64.b64decode(token).decode("utf-8")
     if channel_name not in channels.keys():
+        try:
+            pathvalidate.validate_filename(channel_name)
+        except:
+            raise ValueError(f"{channel_name} 不能作为频道名")
         create_channel(channel_name, token)
     else:
         if channels[channel_name].token and channels[channel_name].token != token:
