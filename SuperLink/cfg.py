@@ -72,6 +72,7 @@ FIND_NONE = r"%FindNone"
 
 class Cfg:
     """配置文件模块"""
+
     class Group:
         """配置文件的键组合, 用于检测多个键中的一个是否存在"""
 
@@ -135,7 +136,8 @@ class Cfg:
                 obj = ujson.load(f)
             except ujson.JSONDecodeError as exc:
                 raise Cfg.ConfigValueError(
-                    "JSON配置文件格式不正确, 请修正或直接删除", None) from exc
+                    "JSON配置文件格式不正确, 请修正或直接删除", None
+                ) from exc
         Cfg.check_dict_2(standard_type, obj)
         return obj
 
@@ -309,11 +311,7 @@ class Cfg:
 
 # Server Custom
 def read_server_config():
-    STD_CFG = {
-        "开放端口": Cfg.PInt
-    }
-    DEFAULT_CFG = {
-        "开放端口": 24013
-    }
+    STD_CFG = {"开放端口": Cfg.PInt}
+    DEFAULT_CFG = {"开放端口": 24013}
     Cfg.default_cfg("服服互通配置文件.json", DEFAULT_CFG)
     return Cfg.get_cfg("服服互通配置文件.json", STD_CFG)

@@ -11,11 +11,10 @@ try:
 except ImportError:
     pass
 
-__all__ = [
-    "Print"
-]
+__all__ = ["Print"]
 
 _print_lock = threading.RLock()
+
 
 def simple_fmt(kw: dict, arg: str) -> str:
     """简单的字符串格式化
@@ -38,6 +37,7 @@ class Print:
     Raises:
         AssertionError: 无法找到对应的颜色代码
     """
+
     INFO_NORMAL = "§f 信息 "
     INFO_WARN = "§6 警告 "
     INFO_ERROR = "§4 报错 "
@@ -197,7 +197,7 @@ class Print:
                 if "§" in text_line:
                     try:
                         n = text_line.rfind("§")
-                        _setNextCol = text_line[n: n + 2]
+                        _setNextCol = text_line[n : n + 2]
                         if setNextColor == -1:
                             raise AssertionError
                         setNextColor = _setNextCol
@@ -209,7 +209,9 @@ class Print:
                     + " "
                     + Print.colormode_replace(setNextColor + text_line)
                 )
-            print("\n".join(output_txts).encode(errors="ignore").decode(), **print_kwargs)
+            print(
+                "\n".join(output_txts).encode(errors="ignore").decode(), **print_kwargs
+            )
         else:
             print(
                 datetime.datetime.now().strftime("[%H:%M] ")
@@ -305,7 +307,7 @@ class Print:
                 if "§" in text_line:
                     try:
                         n = text_line.rfind("§")
-                        _setNextCol = text_line[n: n + 2]
+                        _setNextCol = text_line[n : n + 2]
                         if setNextColor == -1:
                             raise AssertionError
                         setNextColor = _setNextCol
