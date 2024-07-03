@@ -1,6 +1,6 @@
 from typing import Optional, Any
 from websockets.legacy.server import WebSocketServerProtocol as WSCli
-from .data_formats import Data, format_data
+from .data_formats import Data, SystemData, format_data
 from .utils import gather_funcs
 
 class Client:
@@ -11,7 +11,7 @@ class Client:
         self.channel = channel
         self.token = token
 
-    async def send(self, data: Data):
+    async def send(self, data: Data | SystemData):
         await self.ws.send(data.marshal())
 
 class Channel:

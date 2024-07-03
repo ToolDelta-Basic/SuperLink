@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Data:
-    sender: "Client | None"
+    sender: Client
     type: str
     content: dict
 
@@ -18,9 +18,24 @@ class Data:
             "Content": self.content
         })
 
-def format_data(sender: "Client | None", type: str, content: dict):
+@dataclass
+class SystemData:
+    type: str
+    content: dict
+
+    def marshal(self):
+        return json.dumps({
+            "Type": self.type,
+            "Content": self.content
+        })
+
+def format_data(sender: Client, type: str, content: dict):
     return Data(sender, type, content)
 
-def unmarshal_data(data_json, sender: "Client | None"):
+def format_sys_data(type: str, content: dict):
+    return SystemData(type, content)
+
+def unmarshal_data(data_json, sender: Client) -> Data:
     dat = json.loads(data_json)
-    return Data(sender, dat["Type"], dat["Content"])
+    if sender is not None:
+        return Data(sender, dat["Type"], dat["Content"])

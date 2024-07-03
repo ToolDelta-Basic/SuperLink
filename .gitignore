@@ -5,3 +5,5 @@ __pycache__
 
 *.pyc
 服服互通配置文件.json
+SuperLink/fullchain.pem
+SuperLink/privkey.pem

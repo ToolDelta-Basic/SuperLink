@@ -9,4 +9,4 @@ __extension_data__ = {
 
 @on_data("extensions.check")
 async def ext_request(data: Data):
-    ...
+    await data.sender.send(format_sys_data("extensions.check.resp", {"Extensions": extensions.extension_ids}))
