@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Data:
-    sender: Client
+    sender: "Client"
     type: str
     content: dict
 
@@ -29,13 +29,13 @@ class SystemData:
             "Content": self.content
         })
 
-def format_data(sender: Client, type: str, content: dict):
+def format_data(sender: "Client", type: str, content: dict):
     return Data(sender, type, content)
 
 def format_sys_data(type: str, content: dict):
     return SystemData(type, content)
 
-def unmarshal_data(data_json, sender: Client) -> Data:
+def unmarshal_data(data_json, sender: "Client") -> Data:
     dat = json.loads(data_json)
     if sender is not None:
         return Data(sender, dat["Type"], dat["Content"])
