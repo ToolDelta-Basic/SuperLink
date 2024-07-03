@@ -4,18 +4,16 @@ __extension_data__ = {
     "name": "查询频道在线服务器",
     "id": "check-channel-servers",
     "version": (0, 0, 1),
-    "author": "SuperScript"
+    "author": "SuperScript",
 }
+
 
 @on_data("request.channel_members")
 async def handler(data: Data):
-    sender: Client = data.sender # type: ignore
+    sender: Client = data.sender  # type: ignore
     members = [i.name for i in sender.channel.members.values()]
-    await sender.send(format_data(
-        sender,
-        "request.resp",
-        {
-            "UUID": data.content["UUID"],
-            "Data": members
-        }
-    ))
+    await sender.send(
+        format_data(
+            sender, "request.resp", {"UUID": data.content["UUID"], "Data": members}
+        )
+    )
