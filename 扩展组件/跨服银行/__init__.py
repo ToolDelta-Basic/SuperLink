@@ -35,6 +35,14 @@ async def scb_recv(data: Data):
     old = get_jsdata(data.sender.channel.name, target)
     old[scb_name] = old.get(scb_name, 0) + add_sc
     set_jsdata(data.sender.channel.name, target, old)
+    await data.sender.send(format_data(
+        data.sender,
+        "scoreboard.get.result",
+        {
+            "UUID": data.content.get("UUID"),
+            "Score": old.get(scb_name)
+        }
+    ))
 
 
 @on_data("scoreboard.upload.set")
@@ -56,7 +64,7 @@ async def scb_get(data: Data):
         data.sender,
         "scoreboard.get.result",
         {
-            "UUID": data.content["UUID"],
+            "UUID": data.content.get("UUID"),
             "Score": dat.get(scb_name)
         }
     ))
