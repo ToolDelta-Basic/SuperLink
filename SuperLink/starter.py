@@ -18,7 +18,12 @@ from .extensions import extensions
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 cert_file = pathlib.Path(__file__).with_name("fullchain.pem")
 key_file = pathlib.Path(__file__).with_name("privkey.pem")
-ssl_context.load_cert_chain(certfile=cert_file, keyfile=key_file)
+try:
+    ssl_context.load_cert_chain(certfile=cert_file, keyfile=key_file)
+    ssl_avaliable = True
+except:
+    Print.print_war("SSL 安全证书无法使用")
+    ssl_avaliable = False
 
 channels: dict[str, Channel] = {}
 

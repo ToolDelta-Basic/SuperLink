@@ -12,6 +12,6 @@ __extension_data__ = {
 async def ext_request(data: Data):
     await data.sender.send(
         format_sys_data(
-            "extensions.check.resp", {"Extensions": extensions.extension_ids}
+            "extensions.check.resp", {"Extensions": extensions.extension_ids, "UUID": data.content.get("UUID")}
         )
     )
