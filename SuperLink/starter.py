@@ -60,9 +60,11 @@ def init_client_data(ws: WSCli):
         )
     if name is None:
         raise ValueError("Header: need server name")
+    name = base64.b64decode(name).decode("utf-8")
+    if len(name) > 15:
+        raise ValueError(f"Haeader: name too long: {name[:15]}..")
     if channel_name is None:
         raise ValueError("Header: need channel name")
-    name = base64.b64decode(name).decode("utf-8")
     channel_name = base64.b64decode(channel_name).decode("utf-8")
     if token:
         token = base64.b64decode(token).decode("utf-8")

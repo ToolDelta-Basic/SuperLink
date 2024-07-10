@@ -42,6 +42,7 @@ async def scb_recv(data: Data):
     target = data.content["Target"]
     scb_name = data.content["ScbName"]
     add_sc = data.content["AdScore"]
+    Print.print_inf(f"客户端 §e{data.sender.name}§r 对计分板 §b{scb_name}§r 上传 §b{target}§r 的分数 §e{add_sc}")
     old = get_jsdata(data.sender.channel.name, target)
     old[scb_name] = old.get(scb_name, 0) + add_sc
     set_jsdata(data.sender.channel.name, target, old)
