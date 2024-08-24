@@ -1,8 +1,8 @@
 """配置文件模块"""
 
 import os
+import json
 from typing import Any
-import ujson
 
 NoneType = type(None)
 
@@ -133,8 +133,8 @@ class Cfg:
         path = path if path.endswith(".json") else path + ".json"
         with open(path, "r", encoding="utf-8") as f:
             try:
-                obj = ujson.load(f)
-            except ujson.JSONDecodeError as exc:
+                obj = json.load(f)
+            except json.JSONDecodeError as exc:
                 raise Cfg.ConfigValueError(
                     "JSON配置文件格式不正确, 请修正或直接删除", None
                 ) from exc
@@ -153,7 +153,7 @@ class Cfg:
         path = path if path.endswith(".json") else path + ".json"
         if force or not os.path.isfile(path):
             with open(path, "w", encoding="utf-8") as f:
-                ujson.dump(default, f, indent=4, ensure_ascii=False)
+                json.dump(default, f, indent=4, ensure_ascii=False)
 
     @staticmethod
     def exists(path: str) -> bool:
