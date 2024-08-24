@@ -12,7 +12,7 @@ from websockets.legacy.server import WebSocketServerProtocol as WSCli
 from .cfg import read_server_config
 from .client_classes import Channel, Client
 from .color_print import Print
-from .data_formats import format_data, unmarshal_data, format_sys_data
+from .data_formats import unmarshal_data, format_sys_data
 from .extensions import extensions
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -21,7 +21,7 @@ key_file = pathlib.Path(__file__).with_name("privkey.pem")
 try:
     ssl_context.load_cert_chain(certfile=cert_file, keyfile=key_file)
     ssl_avaliable = True
-except:
+except Exception:
     Print.print_war("SSL 安全证书无法使用")
     ssl_avaliable = False
 

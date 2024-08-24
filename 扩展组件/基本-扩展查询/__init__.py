@@ -1,4 +1,4 @@
-from SuperLink import *
+from SuperLink import on_data, format_sys_data, extensions, Data
 
 __extension_data__ = {
     "name": "基本-扩展查询",
@@ -12,6 +12,7 @@ __extension_data__ = {
 async def ext_request(data: Data):
     await data.sender.send(
         format_sys_data(
-            "extensions.check.resp", {"Extensions": extensions.extension_ids, "UUID": data.content.get("UUID")}
+            "extensions.check.resp",
+            {"Extensions": extensions.extension_ids, "UUID": data.content.get("UUID")},
         )
     )

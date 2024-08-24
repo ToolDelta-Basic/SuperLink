@@ -1,4 +1,4 @@
-from SuperLink import *
+from SuperLink import on_client_join, on_client_leave, Client, format_data
 
 __extension_data__ = {
     "name": "登入登出欢迎",

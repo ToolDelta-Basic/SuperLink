@@ -1,4 +1,4 @@
-from SuperLink import *
+from SuperLink import Data, Client, on_data, format_data, Print
 
 __extension_data__ = {
     "name": "消息互通",
