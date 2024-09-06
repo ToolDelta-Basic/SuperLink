@@ -43,7 +43,7 @@ class Extensions:
                 Print.print_suc(
                     f"已成功加载扩展 {ext_module.__extension_data__['name']} @{version} by {ext_module.__extension_data__['author']}"
                 )
-        except:
+        except Exception:
             Print.print_err(f"加载扩展 {i} 出现问题: \n{traceback.format_exc()}")
             raise SystemExit
 
