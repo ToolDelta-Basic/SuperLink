@@ -1,3 +1,4 @@
+from asyncio import run
 from SuperLink.starter import main
 
-main()
+run(main())

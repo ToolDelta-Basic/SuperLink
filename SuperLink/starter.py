@@ -1,13 +1,12 @@
 import asyncio
 import base64
-import json
 import pathlib
 import ssl
 import pathvalidate
+import urllib.parse
 
 import websockets
 from websockets.exceptions import ConnectionClosedError, WebSocketException
-from websockets.legacy.server import WebSocketServerProtocol as WSCli
 
 from .cfg import read_server_config
 from .client_classes import Channel, Client
@@ -41,37 +40,38 @@ def delete_channel(chan: Channel):
     del channels[chan.name]
 
 
-def init_client_data(ws: WSCli):
-    header = ws.request_headers
-    html_ws_reqs = header.get("Sec-WebSocket-Protocol")
-    if html_ws_reqs:
-        try:
-            header = json.loads(html_ws_reqs)
-        except json.JSONDecodeError:
-            raise ValueError("Header: Sec-WS-Proto is not a valid json object")
-    name = header.get("ServerName")
-    channel_name = header.get("ChannelName")
-    token = header.get("ChannelToken")
-    protocol_name = header.get("Protocol")
+def init_client_data(ws: websockets.ServerConnection):
+    if ws.request is None:
+        raise ValueError("Header empty")
+    query_params = urllib.parse.urlparse(ws.request.path).query
+    params = urllib.parse.parse_qs(query_params)
+
+    name = params.get("Name", [None])[0]
+    channel_name = params.get("Channel", [None])[0]
+    token = params.get("Token", [None])[0]
+    protocol_name = params.get("Protocol", [None])[0]
     ipaddr = ws.remote_address
-    if protocol_name != "SuperLink-v4@SuperScript":
+
+    if protocol_name is None:
+        raise ValueError("Header: need protocol name")
+    if base64.b64decode(protocol_name).decode("utf-8") != "SuperLink-v4@SuperScript":
         raise ValueError(
             f"协议名错误, 目前仅支持 SuperLink-v4@SuperScript 协议, 目前使用 {protocol_name}"
         )
     if name is None:
-        raise ValueError("Header: need server name")
+        raise ValueError("需要用户名")
     name = base64.b64decode(name).decode("utf-8")
     if len(name) > 15:
-        raise ValueError(f"Haeader: name too long: {name[:15]}..")
+        raise ValueError(f"名称太长: {name[:15]}..")
     if channel_name is None:
-        raise ValueError("Header: need channel name")
+        raise ValueError("需要大区名")
     channel_name = base64.b64decode(channel_name).decode("utf-8")
     if token:
         token = base64.b64decode(token).decode("utf-8")
     if channel_name not in channels.keys():
         try:
             pathvalidate.validate_filename(channel_name)
-        except:
+        except Exception:
             raise ValueError(f"{channel_name} 不能作为频道名")
         create_channel(channel_name, token)
     else:
@@ -88,7 +88,7 @@ def register_client(cli: Client):
         raise ConnectionError("频道大区密码错误")
 
 
-async def kick_client_before_register(ws: WSCli, reason: str):
+async def kick_client_before_register(ws: websockets.ServerConnection, reason: str):
     await ws.send(format_sys_data("server.auth_failed", {"Reason": reason}).marshal())
 
 
@@ -102,7 +102,7 @@ async def remove_client(cli: Client):
         await chan.leave(cli)
 
 
-async def client_hander(ws: WSCli):
+async def client_hander(ws: websockets.ServerConnection):
     try:
         cli = init_client_data(ws)
         await cli.channel.join(cli)
@@ -141,7 +141,7 @@ async def client_hander(ws: WSCli):
             await remove_client(cli)
 
 
-def main():
+async def main():
     Print.print_with_info("§d服服互通: 服务端 by SuperScript", "§d 加载 ")
     Print.print_with_info(
         "§d项目地址: https://github.com/ToolDelta-Basic/SuperLink", "§d 加载 "
@@ -151,15 +151,10 @@ def main():
     cfgs = read_server_config()
     Print.print_suc(f"服务端将在端口: §f{cfgs['开放端口']} §a开启")
 
-    global_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(global_loop)
-    extensions.set_event_loop(global_loop)
-
-    main_server = websockets.serve(client_hander, "0.0.0.0", cfgs["开放端口"])  # type: ignore
-    global_loop.run_until_complete(main_server)
-    asyncio.run(extensions.handle_load())
+    await websockets.serve(client_hander, "0.0.0.0", cfgs["开放端口"])
+    await extensions.handle_load()
     try:
-        global_loop.run_forever()
+        await asyncio.Event().wait()  # 保持事件循环运行
     except KeyboardInterrupt:
         Print.print_suc("已关闭服务端.")
         exit()

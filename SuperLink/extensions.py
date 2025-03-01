@@ -23,7 +23,7 @@ class Extensions:
         self.on_client_leave_cbs = []
         self.registed_data_handler = {}
 
-    def set_event_loop(self, evt_loop: AbstractEventLoop):
+    def set_extension_event_loop(self, evt_loop: AbstractEventLoop):
         self.event_loop = evt_loop
 
     def make_extension_folder(self):
