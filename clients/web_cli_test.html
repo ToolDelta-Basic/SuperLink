@@ -1,30 +1,134 @@
 <script>
-    console_txts = ""
-    already_login = false
+    var console_texts = ""
+    var already_login = false
+    var ws
+
+    window.onload = function() {
+        user_name.value = `用户${Math.round(Math.random() * 10000)}`
+    }
+
     function connect() {
         if (already_login) {
             alert("你已登录上服服互通服务器了!")
+            return
         }
-        default_url = "ws://superlink.tblstudio.cn:24013"
-        test_url = "ws://127.0.0.1:24013"
-        var header = JSON.stringify(
-            {
-                "Name": user_name.value,
-                "Channel": join_channel.value,
-                "Token": channel_token.value,
-                "ClientType": "HTMLBrowser"
-            }
-        )
+        encodeStringToWS = (str) => encodeURIComponent(btoa(unescape(encodeURIComponent(str))));;
+        url = superlink_ip.value;
+        var userName = encodeStringToWS(user_name.value);
+        var channelName = encodeStringToWS(join_channel.value);
+        var channelToken = encodeStringToWS(channel_token.value);
+        var clientType = encodeStringToWS("HTMLBrowser");
+        var protocolName = encodeStringToWS("SuperLink-v4@SuperScript");
+        var url_complete = `${url}?Name=${userName}&Channel=${channelName}&Token=${channelToken}&ClientType=${clientType}&Protocol=${protocolName}`;
+
         try {
-            var ws = new WebSocket(
-                test_url,
-                [header]
-            )
+            ws = new WebSocket(url_complete);
         } catch (e) {
-            alert("连接 服服互通 服务器出现问题: " + e)
+            alert("不合法的互通服务器 URL！");
+            return
+        }
+
+        t_print("连接中...")
+
+        try {
+            ws.onopen = function () {
+                already_login = true;
+                set_elements_enable_status(true)
+                t_print("已连接到服务器");
+            };
+            ws.onmessage = function (event) {
+                handle_data(event.data);
+            };
+            ws.onerror = function (error) {
+                t_print("发生错误: " + error);
+            };
+            ws.onclose = function () {
+                already_login = false;
+                set_elements_enable_status(false)
+                t_print("断开连接");
+            };
+        } catch (e) {
+            alert("连接 服服互通 服务器出现问题: " + e);
         }
     }
+
+    function handle_data(data) {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            console.log("解析数据出错: " + e);
+            return;
+        }
+        content = data.Content
+        sender = data.Sender
+        switch (data.Type) {
+            case "server.auth_failed": {
+                t_print(`登录互通中心服务器失败: ${content.Reason}`);
+                break;
+            }
+            case "server.auth_success": {
+                t_print(`已登录中心互通服务器，目前 ${content.Member_count} 个客户端在线`)
+                break;
+            }
+            case "client.join": {
+                t_print(`${sender} 加入了频道`)
+                break;
+            }
+            case "client.leave": {
+                t_print(`${sender} 退出了频道`)
+                break;
+            }
+            case "msg.join": {
+                t_print(`${sender} >> ${content.Name} 加入了游戏`)
+                break;
+            }
+            case "msg.leave": {
+                t_print(`${sender} >> ${content.Name} 退出了游戏`)
+                break;
+            }
+            case "chat.msg": {
+                t_print(`${sender} >> ${content.ChatName}: ${content.Msg}`)
+            }
+        }
+    }
+
+    function sendmsg() {
+        var msg = document.getElementById("message").value.trim();
+        if (!already_login) {
+            alert("请先登录至中心服务器");
+            return;
+        }
+        if (msg == "") {
+            return;
+        }
+        send_data("chat.msg", {
+            Sender: user_name.value,
+            ChatName: user_name.value,
+            Msg: msg
+        })
+        t_print(`You >> ${msg}`)
+        document.getElementById("message").value = "";
+    }
+
+    function t_print(text) {
+        console_texts += text + "\n";
+        document.getElementById("output").value = console_texts;
+    }
+
+    function set_elements_enable_status(is_enabled) {
+        document.getElementById("sendmsg_btn").disabled = !is_enabled;
+        document.getElementById("message").disabled = !is_enabled;
+    }
+
+    function send_data(data_type, data_content) {
+        ws.send(JSON.stringify({
+            Type: data_type,
+            Content: data_content
+        }))
+    }
 </script>
+服务器地址: <input type="text" id="superlink_ip"></input>
+<br />
 游客用户名: <input type="text" id="user_name"></input>
 <br />
 登录的频道: <input type="text" id="join_channel" value="公共大区"></input>
@@ -32,4 +136,7 @@
 此频道密码: <input type="text" id="channel_token" value="无"></input>
 <button onclick="connect()">登录</button>
 <br />
-<textarea id="output" cols="50" rows="10"></textarea>
+<textarea id="output" cols="60" rows="15"></textarea>
+<br />
+<input type="text" id="message" value="" disabled="true" style="width: 390px;"></input>
+<button id="sendmsg_btn" onclick="sendmsg()" disabled="true">发送</button>
