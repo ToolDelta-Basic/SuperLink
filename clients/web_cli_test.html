@@ -9,7 +9,10 @@
 
     function connect() {
         if (already_login) {
-            alert("你已登录上服服互通服务器了!")
+            alert("你已登录上服服互通服务器了！")
+            return
+        } else if (!superlink_ip.value) {
+            alert("未填写互通服务器地址！")
             return
         }
         encodeStringToWS = (str) => encodeURIComponent(btoa(unescape(encodeURIComponent(str))));;
@@ -28,7 +31,7 @@
             return
         }
 
-        t_print("连接中...")
+        t_print("正在连接至中心服务器...")
 
         try {
             ws.onopen = function () {
@@ -40,7 +43,7 @@
                 handle_data(event.data);
             };
             ws.onerror = function (error) {
-                t_print("发生错误: " + error);
+                t_print("连接发生错误");
             };
             ws.onclose = function () {
                 already_login = false;
@@ -126,8 +129,14 @@
             Content: data_content
         }))
     }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendmsg();
+        }
+    }
 </script>
-服务器地址: <input type="text" id="superlink_ip"></input>
+服务器地址: <input type="text" id="superlink_ip" value="ws://127.0.0.1:24013"></input>
 <br />
 游客用户名: <input type="text" id="user_name"></input>
 <br />
@@ -136,7 +145,7 @@
 此频道密码: <input type="text" id="channel_token" value="无"></input>
 <button onclick="connect()">登录</button>
 <br />
-<textarea id="output" cols="60" rows="15"></textarea>
+<textarea id="output" cols="60" rows="15" disabled="true"></textarea>
 <br />
-<input type="text" id="message" value="" disabled="true" style="width: 390px;"></input>
+<input type="text" id="message" value="" disabled="true" style="width: 390px;" onkeypress="handleKeyPress(event)"></input>
 <button id="sendmsg_btn" onclick="sendmsg()" disabled="true">发送</button>

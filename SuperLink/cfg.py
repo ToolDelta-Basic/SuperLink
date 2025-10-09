@@ -64,7 +64,7 @@ def _CfgShowType(typ: Any) -> str:
         dict: "json对象",
         list: "列表",
         NoneType: "null",
-    }.get(typ, typ.__name__)
+    }.get(typ, typ.__name__ or "?")
 
 
 FIND_NONE = r"%FindNone"

@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from websockets import ServerConnection
+from websockets import WebSocketServerProtocol as ServerConnection
 from .data_formats import Data, SystemData, format_data
 from .utils import gather_funcs
 

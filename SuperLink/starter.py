@@ -40,12 +40,9 @@ def delete_channel(chan: Channel):
     del channels[chan.name]
 
 
-def init_client_data(ws: websockets.ServerConnection):
-    if ws.request is None:
-        raise ValueError("Header empty")
-    query_params = urllib.parse.urlparse(ws.request.path).query
-    params = urllib.parse.parse_qs(query_params)
-
+def init_client_data(ws: websockets.WebSocketServerProtocol):
+    parsed_url = urllib.parse.urlparse(ws.path)
+    params = urllib.parse.parse_qs(parsed_url.query)
     name = params.get("Name", [None])[0]
     channel_name = params.get("Channel", [None])[0]
     token = params.get("Token", [None])[0]
@@ -88,7 +85,7 @@ def register_client(cli: Client):
         raise ConnectionError("频道大区密码错误")
 
 
-async def kick_client_before_register(ws: websockets.ServerConnection, reason: str):
+async def kick_client_before_register(ws: websockets.WebSocketServerProtocol, reason: str):
     await ws.send(format_sys_data("server.auth_failed", {"Reason": reason}).marshal())
 
 
@@ -102,7 +99,7 @@ async def remove_client(cli: Client):
         await chan.leave(cli)
 
 
-async def client_hander(ws: websockets.ServerConnection):
+async def client_hander(ws: websockets.WebSocketServerProtocol):
     try:
         cli = init_client_data(ws)
         await cli.channel.join(cli)
