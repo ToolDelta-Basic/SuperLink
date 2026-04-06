@@ -1,12 +1,17 @@
 from typing import Optional, Any
-from websockets import WebSocketServerProtocol as ServerConnection
+from websockets import ServerConnection
 from .data_formats import Data, SystemData, format_data
 from .utils import gather_funcs
 
 
 class Client:
     def __init__(
-        self, ws: ServerConnection, name: str, ipaddr, channel: "Channel", token: str | None
+        self,
+        ws: ServerConnection,
+        name: str,
+        ipaddr,
+        channel: "Channel",
+        token: str | None,
     ):
         self.ws = ws
         self.name = name

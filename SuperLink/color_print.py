@@ -1,5 +1,7 @@
 "支持mc颜色代码的输出模块"
 
+# 准备弃用
+
 import datetime
 import threading
 import colorama
